@@ -10,12 +10,27 @@ mod serial;
 use core::panic::PanicInfo;
 
 #[cfg(test)]
-fn test_runner(tests: &[&dyn Fn()]) {
+pub fn test_runner(tests: &[&dyn Testable]) { // new
     serial_println!("Running {} tests", tests.len());
     for test in tests {
-        test();
+        test.run(); // new
     }
     exit_qemu(QemuExitCode::Success);
+}
+
+pub trait Testable {
+    fn run(&self) -> ();
+}
+
+impl<T> Testable for T
+where
+    T: Fn(),
+{
+    fn run(&self) {
+        serial_print!("{}...\t", core::any::type_name::<T>());
+        self();
+        serial_println!("[ok]");
+    }
 }
 
 // our existing panic handler
@@ -46,12 +61,6 @@ pub extern "C" fn _start() -> ! {
     loop {}
 }
 
-#[test_case]
-fn trivial_assertion() {
-    serial_print!("trivial assertion... ");
-    assert_eq!(1, 1);
-    serial_println!("[ok]");
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
@@ -69,3 +78,8 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
     }
 }
 
+
+#[test_case]
+fn trivial_assertion() {
+    assert_eq!(1, 1);
+}
