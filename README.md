@@ -11,4 +11,4 @@ I've created `Makefile` with some common commands I'm using the most.
 - `compile_and_run` compiles code for QEMU and starts the emulator
 
 ## Next step
-- Integration tests
+- ...
